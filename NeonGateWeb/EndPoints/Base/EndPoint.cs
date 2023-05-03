@@ -3,6 +3,7 @@ using NeonGateWeb.EndPoints.Attributes;
 using NeonGateWeb.Global;
 using NeonGateWeb.Global.Extensions;
 using NeonGateWeb.Server.TCP;
+using NeonGateWeb.Utils;
 
 namespace NeonGateWeb.EndPoints.Base;
 
@@ -18,15 +19,15 @@ public abstract class EndPoint
             foreach (var attribute in attributes)
             {
                 var delly = method.CreateDelegate(this);
-                if (attribute is Get getAttribute)
+                var pair = delly.CreateDelegatePair(attribute.ToPath(), attribute.ToRequestType());
+                switch (attribute)
                 {
-                    var pair = delly.CreateDelegatePair(getAttribute.path, RequestType.Get);
-                    HttpServer.MapGetRequest(getAttribute.path, pair);
-                }
-                else if (attribute is Post postAttribute)
-                {
-                    var pair = delly.CreateDelegatePair(postAttribute.path, RequestType.Post);
-                    HttpServer.MapPostRequest(postAttribute.path, pair);
+                    case Get getAttribute:
+                        HttpServer.MapGetRequest(getAttribute.path, pair);
+                        break;
+                    case Post postAttribute:
+                        HttpServer.MapPostRequest(postAttribute.path, pair);
+                        break;
                 }
             }
         }
